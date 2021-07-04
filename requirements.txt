@@ -1,0 +1,11 @@
+tornado==5.1.1
+pypinyin==0.39.0
+pandas==1.0.3
+Flask_Caching==1.9.0
+PyMySQL==0.9.3
+Werkzeug==1.0.0
+pypandoc==1.5
+SQLAlchemy==1.2.11
+Flask==1.1.1
+numpy==1.18.1
+statsmodels==0.12.1

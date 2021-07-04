@@ -1,0 +1,1 @@
+conda activate base & python D:\dabot\cqxfdp\win-server.py
