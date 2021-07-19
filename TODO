@@ -1,0 +1,629 @@
+################################################ Feat ################################################
+debug功能
+log功能
+区划整理
+权限整理
+格式整理（括号的写法）
+refresh功能（内部起一个单独的程序，不走http）
+规范code 和 msg 信息
+report模式
+
+################################################ Update ################################################
+插件过程SQL
+    sql跨数据库如何写
+参数
+    NoTableError的功能扩大
+数据格式
+    value_mapping有时无法生效
+    更新full所有可能取值：year=[now-5, now]之后需要full的时候，目前full会把所有年都弄出来
+    time_format整理
+    同名列的不同取值整理
+    搜索过程整理LIKE-xm:字段用模糊查询（已解决）
+    month=[now, now-12]如何做
+extension过程的整理
+sqlite搭建数据库
+数据库连接数的问题
+
+
+
+################################################ 待解决 ################################################
+- 插件过程，的url中如果出现了on/time_format等参数会报错，应该会覆盖
+- 嵌套格式（第五种数据格式，里面可以写之前的四种格式）
+- 【解决部分】增加TIME_FORMAT参数，针对指标修改时间显示格式
+- full@exclude
+- （写在产品的refresh里面）所有可能取值用sql语句（需要定期更新，没必要每次都从库里取）
+- 整理现有参数：注意，ceil系列，和插件过程结合问题，unit需要实现
+- 项目配置模板文件夹
+- 插件过程的不匹配怎么办（merge的方式）
+- 【暂不解决】插件过程的配置文件加一个必填项字段，需要在sql语句中引用的，如果没传够，直接报错返回
+- 插件过程code202的 app.py中的代码合并
+- 【暂不解决，和指标/指标名字联动时解决】app.py中 统一代码，想不起来了
+- name_limit和stack_limit在件次/件次占比/人次/人次占比上好像没区别
+- 检查配置：
+    init_dicts  dict/list
+    plugins 的检查  value_map
+
+- 用参数控制是否要做数值映射
+- 广东线上环境的refresh会报没有search_xxx的错误
+    - 建表会报错，只能先把表建了
+        case(810, 'Proxy ERROR:DDL statement cannot execute in transaction')
+    - 长时间连接会报错?  注掉两个write的函数，只执行qh的write就恢复了
+        pymysql.err.InterfaceError: (0, '')
+- 插件过程的sql模式的full参数，如何控制需要联动的变量
+- 数值映射的统一
+    1. sql模式中有自己的映射方法
+        1. 项目的VALUE_MAP_FOR_PLUGIN_SQL
+        2. 自定义的value_map
+    2. utils.results2df中包含项目的映射，在params_search之后和sql模式中都用到了
+        项目的映射在utils.value_mapped中，被 utils.results2df使用   被   get_parsed_apis使用
+- 异步写入数据库的方法
+- 写一个部署脚本（注意，数据库连接需要同时指定多个）
+    以该项目为模板，生成一个项目名的文件夹
+        1. 删除其他项目的配置文件/前端大屏
+        2. 需要动态指定数据库连接
+        3. win-server.py和uwsgi.ini需要修改
+- 规范code  和  msg用一个系统的类统一控制
+- g变量   msg  code  apis_copy   apis   权限
+- app --> current_app
+- authentication 中对 request_args也做了拷贝，不好
+- name=year&full=true时，不写year的范围会报错，需要有个默认值  加一个项目参数：year的默认时间跨度
+- full=true 可以让接口处指定自己的范围
+- 接口处可以指定自己的value_map
+- 环境初始化脚本（win+Linux)   win的脚本安装
+    1. 安装所有依赖：进度提示
+        依赖软件：redis+knime+anaconda
+        依赖python包：uwsgi+pymysql+cx_Oracle+flask_caching+pypinyin+pypandoc[+pandoc]+redis....
+    2. 写入环境变量：DABOT_STATE=PRO    选择数据库时先看环境变量
+- 有个gd_id报错
+    http://127.0.0.1:3389/api/xf/?gd_id1=%E7%9F%9B%E7%9B%BE%E5%88%86%E6%9E%90%E9%A2%84%E8%AD%A6%E9%A2%84%E5%88%A4&gd_id2=%E5%9B%BD%E5%AE%B6%E4%B8%93%E9%A1%B9%E7%9D%A3%E5%8A%9E%E4%BF%A1%E8%AE%BF%E6%80%BB%E9%87%8F
+- nlrange在接口处定义  xfcsrange 在接口处定义
+- 初始化值去去数据库查
+- refresh之后的返回值提供refresh过程的成功数/失败数/时间
+- 批量测试接口：可以拿到接口的log/msg/table/data
+- 批量测试要求的数据表，没有表报出来，没有数据也报错，并可选是否建表，是否填数，是否随机化填数字
+- 蓝图化：/api   /大屏    /refresh    /test
+- 时间  近十二个月     year/month/date   都用整型
+    date      time_format=year-month月day   time_show=%Y%m%d     year=2020    month=2020-01     day=2020-01-01,2020-10-10
+- 连接数的问题
+- logger可选定向到文件还是返回前端
+    - msg参数改成字典，写每一步的步骤名和参数
+    - 返回值增加log参数 [{"stage": "", "msg": "", "last": "10s"}, {}]
+    - 添加是否显示log的项目参数
+    - g变量的监听：装饰器？
+    1. 封装一个函数，检查url速度问题【装饰器】
+    2. http://127.0.0.1:3389/api/xf/?gd_id1=%E4%BF%A1%E8%AE%BF%E4%BA%8B%E9%A1%B9%E9%A2%84%E8%AD%A6&gd_id2=%E8%B5%B4%E7%9C%81%E8%AE%BF&gd_id3=%E4%BF%A1%E8%AE%BF%E9%87%8F%E8%B5%B0%E5%8A%BF&Cqh=%E5%B9%BF%E4%B8%9C%E7%9C%81&day=[2020-10-20,2020-11-19]
+- 任意维度的占比，目前实现有问题
+- zb的功能丰富/groupby的功能丰富
+- 转交办效率【groupby  mean(value)】+预警状态的实现
+- 信访事项（xf_xfjmx)  需要去重计数groupby unicount
+- FUZZY-xm: 字段用分词查询
+- 插件过程加一个report 包括 指标和图表
+    实现方法就是把所有需要的数字，放到parse_data(app的那个入口函数)跑一遍
+    图表: 在convert层做  graph=bar     show=data   |   pic   |   show=code
+    show=data/pic/code              pic/code[需要指定type=num/bar/line/pie/map]  和 colors    BLUE
+    settings里面加色系的参数
+    settings加从文件加载还是配置数据库 / 两个都选  文件会覆盖掉同名的数据库配置
+    save2table=xf_xfj_cd_shej_xfjc    如果不指定可以推断出来
+    save2es=
+    graph=bar
+- add_unit的实现
+- embededding的嵌套格式【name=a,b,c,d】
+- 河北项目的sql过程是字符串类型的小数点
+    http://127.0.0.1:3389/api/xf/?gd_id=hb_xfxs_sxrmd&day=[2020-10-26,2020-11-25]
+- 系统配置中指定项目配置的默认值，不用每次用的时候给默认值
+
+# 金鸿
+- uwsgi 在win下怎么用【不重要】
+- 监听一个进程的运行时间，超时就报错【不重要】
+    自己想一个方法
+    修改windows下的signal
+
+
+################################################ 影响广东项目 ################################################
+-【待测试】 sql执行过程，需要增加 Cqh的等级判断
+    a. ext=jssllv_xx_xx/jssllv_yy_yy
+    b. 解决权限问题
+-【待测试】 sql要把所有的参数拼进去
+-【待测试】看0Y000089（0D00089和0Y00089）
+
+- 报告中的同比
+- 对数
+    - 参评评价的数字对不上
+    - 满意率和参评率的细化（0的问题）
+    - 信访事项预警-->省局集体访量-->两个满意率为0
+- 【已解决】权限
+    信访部门 + 责任单位 的弹窗的权限
+    ⭐方案：在api_gateway层加入cookie之后，在parse_api层 通过cookie加入 param_trans 参数
+- 权限需要注意的地方
+    微信端的权限
+    【在get_parsed_apis中修改】table参数
+    【在get_parsed_apis中修改】extra_index中的table修改 如件次/件次占比/人次/人次占比
+    【在get_parsed_apis中修改】gd_id分发的情况
+    gd_id的插件过程
+        【参考地图下钻的大弹窗】sql模式
+        custom模式
+- http://127.0.0.1:3389/api/xf/?transformer=@jssllv&ext=jssllv_xfbm_all_shej_nums/jssllv_xfbm_all_shij_nums&name=slqk&full=true&xfbm=%E5%B9%BF%E4%B8%9C%E7%9C%81%E4%BF%A1%E8%AE%BF%E5%B1%80
+    及时受理率的相关指标返回了"1"
+
+
+
+- 【已解决】ext_params 放transformer的参数【predict中测试】  删掉transformer参数校验的":"事情
+- 【已解决】*****预测的过程，展示和用到的时间跨度不一定一样
+- *****预测的分组
+- *****param_trans 中的 modified_initialization 和条件               g.modified_initialization.update({"day": day_list})
+    - *****qh_godown modified_initialization
+    - 【已解决】*****zrdw_godown【省级的时候，直属小弟】
+    - 【已解决】*****xfbm_godown【直属小弟】
+- *****集成jssllv/aqdflv的sql和表名的切换
+- *****集成name_limit  stack_limit
+- *****云南项目的dispatch和测试
+- SQL过程的的执行try一下，如果没表报错开关   关了   没字段报错开关    关了  不同的报错，不同的处理
+- SQL过程的展示也放到name/stack/value[db_engine=fx_db]
+- reindex的判断
+- 【已解决】【统一在dispatch处理】参数的空格
+- ext_params 覆盖ext的参数
+- 【暂时解决】extra_index里面，用逗号分隔，如果不满足@条件，说明这个逗号不是分隔符号
+
+
+###################################### 河北用新代码的问题 ####################################
+重点信访人画像
+    也是带着中括号
+去掉趋势的请求
+    前端去掉了
+小数点：信访形式-->受信人那一页
+国家省市县的顺序
+    这个请求没加full
+    http://127.0.0.1:3389/api/xf/xfjc/?lx=djjg_xfxs&stack=djjg&name=$timetype&value=xfjc&year=[now-4,+now]&timetype=cy&xfxs=drop
+
+
+
+######################################## 广东新修改 ##############################################
+1.  "信访事项预警_集体访_信访量": "http://127.0.0.1:3389/api/xf/?table=xf_xfj_cd_xj_jtf_xfjc&order=-xfjc&jtf=集体访&transformer=@groupby&full=true&day=[2020-01-01,2020-10-09]&Cqh=广东省&param_trans=qh_godown",
+    "信访事项预警_集体访_满意率-信访部门": "http://127.0.0.1:3389/api/xf/?table=xf_xfj_cd_xj_jtf_xfbmmyjc&order=-mylv&jtf=集体访&transformer=@mylv&full=true&day=[2020-01-01,2020-10-09]&Cqh=广东省&param_trans=qh_godown",
+    "信访事项预警_集体访_满意率-责任单位": "http://127.0.0.1:3389/api/xf/?table=xf_xfj_cd_xj_jtf_zrdwmyjc&order=-mylv&jtf=集体访&transformer=@mylv&full=true&day=[2020-01-01,2020-10-09]&Cqh=广东省&param_trans=qh_godown",
+    "信访事项预警_集体访_信访量走势": "http://127.0.0.1:3389/api/xf/?table=xf_xfj_cm_xj_jtf_xfjc&jtf=集体访&name=date&transformer=@groupby&full=true&param_protect=black_list(day)&time_format=%Y年%m月&date=[now-12m,now]&Cqh=广东省",
+    "信访事项预警_集体访_预警状态": "http://127.0.0.1:3389/api/xf/?table=xf_xfj_cd_xj_jtf_xfjc&jtf=集体访&full=true&transformer=@yjzt&extra_index=transformer@to:@groupby,transformer@to:@tb,transformer@to:@hb&main_name=预警状态,近一周,同比,环比&day=[now-7,now]&Cqh=广东省&param_protect=black_list(day+Cqh)",
+【缺两个】
+把这一页的所有gd_id2改掉
+到省走访页的去掉jtf_
+指标名+dszf  (到省走访)【表名+指标名】
+
+2.  信访事项预警 --- > 信访量趋势变化
+     信访目的分布 ----> 信访形式分布   xfmd-->xfxs
+
+3. 绩效考核区划分布添加个圈  重复信访率(等sql)
+
+4. 信访内容分类模块
+    yjnr/ejnr/sjnr   里面的内容是带下划线
+    name=_ejnr
+    name=_sjnr
+        有一个占比的过程   前十的占比用extension做
+
+5. 预测
+    同比环比预警状态的 reuse
+
+6. 绩效考核的指标
+    1. 部门排名的godown
+    2. 责任单位排名的godown
+    3. 饼图和率的检查
+    4. 地图时的 modified_initialization
+
+
+弹窗的公共接口需要用gd_id的方法写   full=none
+【已解决】网信占比信访部门的排名   保留小数
+【已解决】责任单位的排名 limit20
+
+
+
+
+
+
+###################################### 广东终验 ####################################
+【已解决】生成报告   xf_xfj_cd_zt_xj_djjg_xfjc -> xf_xfj_cd_zt_qh_djjg_xfjc
+【已解决】微信  态势 走势  现在不是三条线
+【已解决】网信占比的信访部门排名会报错
+【已解决】责任单位的zrdw_godown   参考金鸿的19个责任单位
+
+4. 辅助决策需要检查的两个
+
+5. 预测的两层壳子
+
+6. 【已解决】qh_godown时需要修改modified_initialization
+
+
+###################################### 广东终验-前端 ####################################
+1. 【待测试（前端）】[信访绩效考核模块]排名的小数--->百分比
+2. 【待测试（前端）】日期默认都是从当前年的01-01开始
+3. 【待测试（前端）】信访绩效考核-->信访部门/责任单位 --> 网信
+    删掉网信占比的排名
+4. 【待测试（前端）】绩效考核地图下钻需要带参数
+
+8. [应该重新部署就好了]信访人画像整个报错：  身份证号请求的带 中括号【可能不好解决】
+9. 【待对接】接口用gd_id来写
+    1. 【待对接】公共接口 加full=none 同时注意权限的控制（后端完成）【权限暂未完成】
+    2. 辅助决策需要修改的接口
+        3. 【待对接】[需要在文档中改]全局业务监控--->重复新房监控--> 四季登记机构分布   xf_xfj_cd_xj_cfxfbz_djjg_xfjc  --> xf_xfj_cd_qh_cfxfbz_djjg_xfjc
+        4. 【待对接】[需要在文档中改]自定义主题分析的   左下角  分布和走势    xf_xfj_cd_zt_qh_djjg_xfjc
+        5. 【待对接】[需要在文档中改]全局业务监控 的重件是100%   xf_xfj_cd_xj_cfxfbz_xfjc      xf_xfj_cd_xj_xfjc
+    3. 【待对接】信访总量预警-->总量预警好像没接    和  驾驶舱的 信访事项预警--->信访总量 一样
+
+1. 【已解决】【需要修改stack的逻辑，按照件次排序，同时保证人次不能乱】全局业务监控-->信访件监控-->内容分类   的中间top3并不是top3
+2. 【待对接】预测的接口（后端完成）
+3. 【已解决】信访部门的网信占比是0
+4. 【待测试（整合后）】绩效考核地图下钻的逻辑
+5. 【待测试（前端）】绩效考核-责任单位一整页需要加Cqh
+
+
+
+###################################### 广东终验-金鸿 ####################################
+- 这一批接口的gd_id个数不统一
+    # zrdw_godown待实现【省级的时候，直属小弟】
+    "信访绩效考核_责任单位_排名_参评率$": "http://127.0.0.1:3389/api/xf/?table=xf_xfjg_cd_qh_zrdw_xfxs_ypjjc&full=true&transformer=@cplv&name=zrdw&order=-cplv&limit=20&day=[2020-01-01,2020-10-09]&zrdw=广东省统计局&param_trans=zrdw_godown",
+    "信访绩效考核_责任单位_排名_满意率$": "http://127.0.0.1:3389/api/xf/?table=xf_xfjg_cd_qh_zrdw_xfxs_myjc&full=true&transformer=@mylv&name=zrdw&order=-mylv&limit=20&day=[2020-01-01,2020-10-09]&zrdw=广东省统计局&param_trans=zrdw_godown",
+    "信访绩效考核_责任单位_排名_及时受理率$": "http://127.0.0.1:3389/api/xf/?&full=true&transformer=@jssllv&ext=jssllv_zrdw_all_list&order=-jssllv&limit=20&day=[2020-01-01,2020-10-09]&name=zrdw&full=true&zrdw=广东省统计局&param_trans=zrdw_godown",
+    "信访绩效考核_责任单位_(来信|来访|网信)_排名_及时受理率$": "http://127.0.0.1:3389/api/xf/?&full=true&transformer=@jssllv&ext=jssllv_zrdw_xfxs_list&order=-jssllv&xfxs={gd_id4}&limit=20&day=[2020-01-01,2020-10-09]&name=zrdw&full=true&zrdw=广东省统计局&param_trans=zrdw_godown",
+    "信访绩效考核_责任单位_drop_排名_及时受理率$": "http://127.0.0.1:3389/api/xf/?&full=true&transformer=@jssllv&ext=jssllv_zrdw_all_list&order=-jssllv&limit=20&day=[2020-01-01,2020-10-09]&name=zrdw&full=true&zrdw=广东省统计局&param_trans=zrdw_godown",
+    "信访绩效考核_责任单位_排名_网信占比$": "http://127.0.0.1:3389/api/xf/?table=xf_xfjg_cd_qh_zrdw_xfxs_xfjc&full=true&transformer=@wxzb&name=xfbm&order=-wxzb&day=[2020-01-01,2020-10-09]&full=true&param_trans=zrdw_godown&param_protect=black_list(zrdw+xfxs)",
+- sql填空的测试
+
+
+###################################### 云南三个模块 ####################################
+1. 【金鸿】重点人员【参考河北】
+    用到业务库表（确认和河北是否一样）
+2. 预警预测模块
+    【付尧】预测：分市分一级内容  （cm）  xf_xfj_cm_shij_yjnr_xfjc
+    【付尧】预警：信访量/进京访/赴省访/集体访（4个接口）   件次/同比/环比/预警状态
+        【萱萱】1. 目前是cm-->cd
+        【付尧】2. 这四个里面有几个告警/几个异常/几个平稳
+3. 行为预警
+   【萱萱】1. 行为指数的计算
+   【金鸿】2. 人员的概况
+        - 时间
+        - 指数
+        - 指数预警：行为指数的分析（连续多少个月上涨==>高级）
+        - 特殊行为统计：扬言/过激行为/非访
+    3. 信访行为统计
+        【郭冉】1. 特殊时间的标记
+        【金鸿】2. 行为人的上访时间
+
+
+#################### 2020-12-07  2020-12-11 ####################
+2. /api/gd_id/xf?mode=create&name=xx_xx_xx_&value=sadfdsafdsafdsaf
+3. /api/gd_id/xf?mode=query&            /api/data/xf
+4. 【付尧】预测：分市分一级内容  （cm）  xf_xfj_cm_shij_yjnr_xfjc
+5. 【付尧】预警：信访量/进京访/赴省访/集体访（4个接口）   件次/同比/环比/预警状态
+        【萱萱】1. 目前是cm-->cd
+        【付尧】2. 这四个里面有几个告警/几个异常/几个平稳
+6. 【已解决】广东问题：
+7. 云南旭日图的嵌套格式&limit=3    当嵌套格式的时候，limit指的是最外层的分类：yjnr要前三 ejnr
+8. 开发一个工具：将写好的表名，按照一定规则把表初始化到数据库，并可选是否随机初始化一些值
+9. 判断权限
+    1. 【已解决】将gd_id的插件格式都加一个table参数，用来告诉qh2sheshixj
+    2. 【暂不解决】接口中没有Cqh，统一加上
+    3. 【已解决】如果接口的cookie超过了传的Cqh，或者接口的cookie超过了传的shej_02 shij_02 xj_02
+        就降级成接口cookie的Cqh
+    4. 【已解决】【弹窗同级的处理】 写三个param_trans 处理三个弹窗的权限
+    5. 【已解决】对应权限的 信访绩效考核中的 信访部门+责任单位 的默认值
+    6. 【已解决】报告的权限[plugin 里面增加report功能   还是 sql_qh直接拼qh条件]
+10. 插件过程增加report【报告要处理权限】
+11. extra_index里面 兼容 = <==> @to:  [如果直接替换=，会把predict(7d+q=1)替换掉]
+12. calculate增加sql文件夹存放sql文件，直接执行所有的sql文件写出到指定的数据库
+    增加多进程计算的支持
+13. 【已解决】debug=1 或者 2 可以看到具体哪一个的请求（在search之前）
+14. 【已解决】缓存的路径需要拼接 权限
+15. 对app.config封装一个类，类里面有一系列方法  class ConfigManager:
+        创建gd_id分发的接口，查看gd_id分发的接口，删除gd_id分发的接口
+        创建plugin[sql]的接口，查看plugin[sql]的接口，删除plugin[sql]的接口
+        注册字段进init_dicts的接口，查看init_dicts注册字段的接口，删除init_dicts注册字段的接口，
+        查看系统变量设置的接口，修改系统变量的接口
+        直接查看指定数据表所有字段名的接口    直接查看指定数据表数据[前n行]的接口       查看指定数据库数据表个数的接口
+16. debug的细化，可以最终执行的sql语句
+    普通extension
+    特殊extension[jssllv]
+    sql过程
+    custom过程
+17. sql_qhauth [auto/qh/sheshixj] 拿到g变量中【目前在apis中，还需要再global中加特殊参数，不合适】
+18. 广东绩效考核
+    区划
+    1. 区划中选择来信/来访/   及时受理率是0
+    2. 地图的及时受理率是0
+    3. 按期答复率不变【来信来访网信是一样的 率+地图】
+        权限： 按期答复率没变
+            责任单位 参评满意 和
+关掉没有表/没有字段 的报错  sql/custom过程依然会报错
+
+
+#################### 广东交付 ####################
+1. 绩效考核 -> 区划分布  及时受理率的来信来访
+2. 绩效考核 -> 信访部门  及时受理率排名
+
+生成指标表
+1. 删掉前两个下划线
+2. 字段变化
+    cy->year    cm->year,month   cd->day
+    shej->shej_02     shij->shej_02,shij_02     xj->shej_02,shij_02,xj_02
+    yjnr->yjnr        ejnr->yjnr,ejnr           sjnr->yjnr,ejnr,sjnr
+3. 字段类型
+    最后一个int类型
+
+
+
+重庆：
+1. [先不动]有的表，表名没有标识shij/xj/shej
+2. [可以删掉]初件重件联名件列表--->初件重件列表       初件重件联名件走势--->初件重件走势
+3. [莹姐和萌哥确认] 信访形式->来信->受信人的列表需要一个顺序字段 sx
+4. [和萌哥确认]信访形式->来信->受信人非左侧列表的指标，xf_sxr 的表中需要sxr的字段
+5. [待定]信访形式->来访->进京访 人数规模走势  jtf显示的内容是 个访/集体访  数据表中存储的是集体访/非集体访  还是 集体访/个访
+6. [待定]网信在表里的存储是否需要转换
+7. [name/value 用zb]补丁图应该不用河北那么复杂的格式【和郭冉沟通】
+    河北格式:http://127.0.0.1:3389/api/xf/xfjc_zb/?timetype=cd&lx=sjnr&name=sjnr&value=xfjc&stack=sjnr&transformer=@groupby&extra_index=transformer@to:@zb,index@to:xfrc_zb;value@to:xfrc,index@to:xfrc_zb;value@to:xfrc;transformer@to:@zb&main_name=信访件次,件次占比,信访人次,人次占比&ejnr=土地征收&day=[2020-11-19,2020-12-19]
+8. [可以修改成天]天筛选走势横坐标显示天，大屏上有的显示月
+9. [找每个区划的最高的]宏观态势板块【最后一个板块】的指数预警 和 热点问题预警的地图 有什么不一样
+10. 宏观态势板块【最后一个板块】的指数预警 列表的指数名称，固定出来，样式和数据不同（不走接口）
+11. 宏观态势板块【最后一个板块】的指数预警 数据表名中有县级 有信访形式【没有看到对应的筛选】 目前按照没有xj筛选和xfxs筛选的方式
+12. [需要筛选]内容分类的补丁图是否需要筛选二级内容
+接口遗留
+    1. ⭐⭐【问题3】受信人名单 的数据表 sx(顺序)字段的问题, 需要sxr字段【待确认】
+        sxr时 full=none
+    2. ⭐⭐有一张旭日图(只有一级内容和二级内容)
+    5. ⭐⭐地图取最高值
+
+
+集成金鸿写的embedding模块/graph模块
+【已解决】整理广东的sql，下午约东哥探讨
+删除apis_copy中不应该出现的内容，添加到g中
+【已解决】下午探讨重庆的问题
+宏观态势板块【最后一个板块】的指数预警 地图的不同: 取最高的值
+
+生成计算表
+    in=xf_xfjxx@filter()@col(a+b+c),xf_xfjdetail@filter()@col(a+b+c)
+        1. @filter的参数中实现的方法需要提前写，并且有默认值[遇到某个表就有专属的filter方法]
+    col_trans_in=a->b,c->d,qhdm->@xj,xfrq->@day, special->@process_special
+        1. qhdm->xj 意思是从qhdm中获取shej_02/shij_02/xj_02
+        2. xfrq->day/year/month  如果是month, 需要year和month和date
+    agg=pre:, groupby:@unicount, post:unicount->xfrsrange,
+        1. 如果post转换的结果中有range, 如uncount->xfrsrange, 自动拼接另一个agg=pre:followintogroup,groupby:@unicount,post:unicount->xfjc
+    col_trans_agg=
+    out=xf_xfj_cd_xj_xfjc
+    engine=puresql/sql/sqlpy/spark/getsql/stream               # 适配器模式: 类的多态
+    db=mysql/es【测一下ES的速度，是否需要放到计算端做，还是接口直接做】
+    time=2020-01-01,2020-10-10 / 2020-01,2020-10 / 2019,2020   # 这里也可以写到系统的配置文件中
+        1. 最开始计算的时候是一个filter
+        2. remove_and_append这个模式, 需要在库里先删time段的数据
+    write_mode=remove_and_append/append/overwrite
+
+
+    思考:
+        0. 如何架构
+            - 每种模式是一个类【参考extension的实现过程】
+            - 每个方法返回self
+            - 按顺序调用方法，每次更新self.res的值
+            - 基类实现监控方法【执行时长等信息】
+        1. 如何监控: 【运维阶段】
+        2. 如何即时查看: 【开发阶段】
+        3. 如何分布式: 【运维阶段】
+            不同引擎的分布式
+            是否需要抽取数据-->是否需要主从/PXC分布式
+        4. 索引的添加
+        5. 流式计算stream引擎
+            flink/kylin
+        6. 写出的策略: sql -> 存储过程分片段写出
+
+    示例
+        in=@col(a+b+c)
+        col_trans_in=a->b,c->d
+        out=xf_xfj_cd_xj_xfjc
+        time=2020-01-01,2020-10-10
+    步骤
+        【in】1. 生成筛选id列表
+        【in】2. 根据筛选id + 列 得到目标数据集合
+        【col_trans】3. 列处理(重命名+时空处理)
+        【agg】4. 多次分组计算
+        【out】5. 整理并写出
+
+
+
+
+
+#################### 广东交付 ####################
+全部是天
+新增模块:
+    信访事项关系图谱: 我是谁 告谁  经办人 问题属地 办理机构  户籍地  他父亲是谁（信访件要素识别）
+    信访事项流程办理分布监控图
+        条件自定义
+        各阶段信访件个数: 受理 答复 办理 复查 复核，支持反查
+    自定义报表
+
+总量分析
+    信访形式-->
+
+
+【0】深圳接口调试
+
+【1】词云
+    1. 如何算出来
+        https://stackoverflow.com/questions/55080093/how-to-generate-a-word-cloud-using-elasticsearch
+    2. 数据格式
+        name/value
+    3. 停用词的问题
+        - 找到合适的分词器
+        - logstash导入
+    4. 自定义词库
+    5. 与mysql
+        1. 导入es
+        2. 结果写出mysql[测一下]
+            两个结果: 热词的结果 / 每个热词对应的信访件的分析
+        建议:
+            1. es只放信访摘要信息/id
+            2. 热词的搜索结果 'agg': {"diy": "word"}
+                1. 停用词
+                2. 自定义词表的问题<>token1.dic<>
+                3. 分词器: ik/HanLP
+                注意: 索引时分词/查询时分词
+            3. 利用logstash[需要一个插件]从mysql导入ES，然后把两种结果导出mysql
+                注意: 【以后用得上】logstash的一个功能: 监听mysql某张表的某一个数据的某一个字段是否发生变化
+                    监听update_time --> 增量导入
+
+【1】关系图谱
+    1. 信息有现成的，看用什么方式展示 echarts
+
+
+【2】工具开发:
+    #一键安装环境
+    #    docker【k8s】
+    #        注意: docker的资源申请
+    批量生成 init_dicts
+        1. 以深圳为例子: 基于表名
+        2. 有些字段有默认填好的取值: 如cnt
+        #⭐3. 填空: 能不能去库里填[dm]
+    生成表(老格式/新格式)
+        1. 接深圳接口【新格式】
+        2. 兼容一些问题【做成配置文件】
+    生成前端对接的文档
+        1. 把js文件暴露出来，集成一个可以填js文件的功能
+
+信访事项流程办理分布监控图
+    1. 自定义条件: engine=fx_db [确定->]
+    2. 找到数据范围 算各阶段[5阶段]的个数
+        情况1: 表里直接有[某一列的5中不同取值]
+        情况2: 5阶段是5个列
+    3. 数据反查
+        方法1: 把五阶段写到五张表里面
+        方法2: 直接搜，加一个条件
+
+自定义报表
+    情况1: 带数据反查的详细报表: 表格
+    情况2: 粗略报表,只显示数字【做成plugin，mode=report】
+
+
+数据反查的原始图做成普通模式【需要加一个 transformer=dq_before】
+    "query": "xfxs=来信"
+    "query": "nlrange=1-5人"
+    "query": "nlrange=1-5人"
+    注意:
+        query的补零: 是在name/value补零之后，从name里面获取值，从name获取字段名, 进行拼接
+
+数据反查做成普通模式【需要加一个 transformer=dq_after】inverse=【包装一个工具可以处理字段，类似param_trans】 每一列有专属的处理方案
+    注意:
+        多个表时用extra_index 并指定哪个字段需要相同
+        请求参数name=a,b,c,d[和嵌套格式冲突]  只要有fx_db参与就不嵌套
+
+计算流程
+    1. logstash监听updatetime 增量导入
+    2. 记录导入数据的时间跨度
+    3. 计算跨度内影响到的指标写出指标表
+
+
+########################################## 深圳 ###############################################
+1. full目前的默认值是none，补零策略需要业务人员来写
+2. is_ga=false时，需要加上 modified_initialization 现在没加
+
+########################################## 重庆 ###############################################
+1. 最后一个板块的地图目前没有取最高值
+2. 受信人名单 的数据表 sx(顺序)字段的问题, 需要sxr字段【待确认】【目前用的是河北的表】
+
+########################################## 广东 ###############################################
+1. sql要大改
+2. 报告报错【接入生成pdf的过程】
+3. sql大改完，丢掉很多param_trans的东西，需要拿线上备份的对
+4. 制作东莞市的区县json地图
+5. 覆盖线上的gd配置之后，添加每日新房动态排名的order=desc
+
+########################################## 云南 ###############################################
+1. 信访指数的计算
+2. 数据表的大反查: nlrange的反查
+    需要中间表: 计算的时候保存中间结果
+
+########################################## 工具 ###############################################
+1. 打包工具：确定需要打包的项目，基于现在的内容，删除其他项目，重命名后打包
+2.
+
+########################################## 接口 ###############################################
+1. 集成graph
+2. 插件过程增加report【报告要处理权限】
+3. extra_index里面 兼容 = <==> @to:  [如果直接替换=，会把predict(7d+q=1)替换掉]
+4. calculate增加sql文件夹存放sql文件，直接执行所有的sql文件写出到指定的数据库
+    增加多进程计算的支持
+5. 对app.config封装一个类，类里面有一系列方法  class ConfigManager:
+        创建gd_id分发的接口，查看gd_id分发的接口，删除gd_id分发的接口
+        创建plugin[sql]的接口，查看plugin[sql]的接口，删除plugin[sql]的接口
+        注册字段进init_dicts的接口，查看init_dicts注册字段的接口，删除init_dicts注册字段的接口，
+        查看系统变量设置的接口，修改系统变量的接口
+        直接查看指定数据表所有字段名的接口    直接查看指定数据表数据[前n行]的接口       查看指定数据库数据表个数的接口
+6. debug的细化，可以最终执行的sql语句
+    普通extension
+    特殊extension[jssllv]
+    sql过程
+    custom过程
+7. sql_qhauth [auto/qh/sheshixj] 拿到g变量中【目前在apis中，还需要再global中加特殊参数，不合适】
+8. 整理g变量用到的参数
+    modified_initialization
+    index_idx  vs  debug[判断位于第几个指标方便跳出]
+    reqdicts_before_pt
+    level_auth
+9. 转换多表的时候，可以转成table格式
+    1. 一列一列拼起来 多个值用main_name拼成的name/value/stack（不走nsv过程）
+    2. 一行一行拼起来 多个值用main_name拼成的name/value
+
+########################################## 计算 ###############################################
+0. 测试过程: 所有的sql添加limit=1
+    1. df的列名 和 从table名得到的列名 是否一致
+    2. df的字段 和 设置好的字段映射是否一致
+1. 获取sql 和 目标表信息
+    - 从文件
+    - 从数据库
+    - 从knime
+2. 格式化sql【涉及到配置文件，运行多长时间的】
+3. 执行sql获取结果【遍历加limit】防止一次过多
+4. 建表
+5. 逐行插入【涉及到配置文件，字段和类型】
+
+配置
+    0. 先把所有的sql lim
+    1. 数据库连接
+        读入库：一组数据库，轮询
+        写出库：一组数据库，轮询
+    2. 设置获取sql和目标表的方式
+    3. 每次查多少条
+    4. 格式化sql需要的信息: day_from  day_to
+    5. 写出表的字段类型映射
+    6. 日志目录
+        数据库
+        文件
+        流程编号(0D000XX) 开始执行时间  执行完成时间  执行耗时  执行状态 异常原因 创建时间  修改时间
+    7. 并行数
+    8. 是否测试过程: 测试就是把所有的sql，limit=1
+
+
+云南
+    漏斗的custom
+    时间线的custom: br连接  没有次数 只有内容
+    卡片的custom: 类似时间线的custom 多几个wrapper
+
+漏斗：
+<p style="font-size: 18px;
+          color: #fff;line-height: 30px;">
+            <b style="color: #ff0010;">一般信访行为</b>
+            转化为 <b style="color: #ff0010;">到省访</b>转化率为 <b style="color: #ff0010;">89%</b>，实施 <b style="color: #ff0010;">红色预警</b>
+            </p >
+            <p style="font-size: 18px;
+          color: #fff;line-height: 30px;">
+            <b style="color: #fe5e00;">一般信访行为</b>
+            转化为 <b style="color: #fe5e00;">到省访</b>转化率为 <b style="color: #fe5e00;">89%</b>，实施 <b style="color: #fe5e00;">橙色预警</b>
+
+            </p >
+            <p style="font-size: 18px;
+          color: #fff;line-height: 30px;">
+              <b style="color: #2a5cfd;">一般信访行为</b>
+            转化为 <b style="color: #2a5cfd;">到省访</b>转化率为 <b style="color: #2a5cfd;">89%</b>，实施 <b style="color: #2a5cfd;">蓝色预警</b>
+            </p >
+深圳
+    问题1：main_name=$zqlx
+    问题2：main_name=总数:bar,:line
+    [done]问题3：value和name-value用main_name拼起来
+    问题4：value_map
+
+深圳：
+占比的sum分类讨论                       本地是对的
+conver_df的__init__ 报错时返回了元组     本地是对的
+dispatch的市辖区
