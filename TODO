@@ -1,103 +1,24 @@
 ################################################ Feat ################################################
 debug功能
 log功能
-区划整理
-权限整理
-格式整理（括号的写法）
-refresh功能（内部起一个单独的程序，不走http）
-规范code 和 msg 信息
-report模式
-
-################################################ Update ################################################
-插件过程SQL
-    sql跨数据库如何写
-参数
-    NoTableError的功能扩大
-数据格式
-    value_mapping有时无法生效
-    更新full所有可能取值：year=[now-5, now]之后需要full的时候，目前full会把所有年都弄出来
-    time_format整理
-    同名列的不同取值整理
-    搜索过程整理LIKE-xm:字段用模糊查询（已解决）
-    month=[now, now-12]如何做
-extension过程的整理
-sqlite搭建数据库
-数据库连接数的问题
-
-
-
-################################################ 待解决 ################################################
-- 插件过程，的url中如果出现了on/time_format等参数会报错，应该会覆盖
-- 嵌套格式（第五种数据格式，里面可以写之前的四种格式）
-- 【解决部分】增加TIME_FORMAT参数，针对指标修改时间显示格式
-- full@exclude
-- （写在产品的refresh里面）所有可能取值用sql语句（需要定期更新，没必要每次都从库里取）
-- 整理现有参数：注意，ceil系列，和插件过程结合问题，unit需要实现
-- 项目配置模板文件夹
-- 插件过程的不匹配怎么办（merge的方式）
-- 【暂不解决】插件过程的配置文件加一个必填项字段，需要在sql语句中引用的，如果没传够，直接报错返回
-- 插件过程code202的 app.py中的代码合并
-- 【暂不解决，和指标/指标名字联动时解决】app.py中 统一代码，想不起来了
-- name_limit和stack_limit在件次/件次占比/人次/人次占比上好像没区别
-- 检查配置：
-    init_dicts  dict/list
-    plugins 的检查  value_map
-
-- 用参数控制是否要做数值映射
-- 广东线上环境的refresh会报没有search_xxx的错误
-    - 建表会报错，只能先把表建了
-        case(810, 'Proxy ERROR:DDL statement cannot execute in transaction')
-    - 长时间连接会报错?  注掉两个write的函数，只执行qh的write就恢复了
-        pymysql.err.InterfaceError: (0, '')
-- 插件过程的sql模式的full参数，如何控制需要联动的变量
-- 数值映射的统一
-    1. sql模式中有自己的映射方法
-        1. 项目的VALUE_MAP_FOR_PLUGIN_SQL
-        2. 自定义的value_map
-    2. utils.results2df中包含项目的映射，在params_search之后和sql模式中都用到了
-        项目的映射在utils.value_mapped中，被 utils.results2df使用   被   get_parsed_apis使用
-- 异步写入数据库的方法
-- 写一个部署脚本（注意，数据库连接需要同时指定多个）
-    以该项目为模板，生成一个项目名的文件夹
-        1. 删除其他项目的配置文件/前端大屏
-        2. 需要动态指定数据库连接
-        3. win-server.py和uwsgi.ini需要修改
-- 规范code  和  msg用一个系统的类统一控制
-- g变量   msg  code  apis_copy   apis   权限
-- app --> current_app
-- authentication 中对 request_args也做了拷贝，不好
-- name=year&full=true时，不写year的范围会报错，需要有个默认值  加一个项目参数：year的默认时间跨度
-- full=true 可以让接口处指定自己的范围
-- 接口处可以指定自己的value_map
-- 环境初始化脚本（win+Linux)   win的脚本安装
-    1. 安装所有依赖：进度提示
-        依赖软件：redis+knime+anaconda
-        依赖python包：uwsgi+pymysql+cx_Oracle+flask_caching+pypinyin+pypandoc[+pandoc]+redis....
-    2. 写入环境变量：DABOT_STATE=PRO    选择数据库时先看环境变量
-- 有个gd_id报错
-    http://127.0.0.1:3389/api/xf/?gd_id1=%E7%9F%9B%E7%9B%BE%E5%88%86%E6%9E%90%E9%A2%84%E8%AD%A6%E9%A2%84%E5%88%A4&gd_id2=%E5%9B%BD%E5%AE%B6%E4%B8%93%E9%A1%B9%E7%9D%A3%E5%8A%9E%E4%BF%A1%E8%AE%BF%E6%80%BB%E9%87%8F
-- nlrange在接口处定义  xfcsrange 在接口处定义
-- 初始化值去去数据库查
-- refresh之后的返回值提供refresh过程的成功数/失败数/时间
-- 批量测试接口：可以拿到接口的log/msg/table/data
-- 批量测试要求的数据表，没有表报出来，没有数据也报错，并可选是否建表，是否填数，是否随机化填数字
-- 蓝图化：/api   /大屏    /refresh    /test
-- 时间  近十二个月     year/month/date   都用整型
-    date      time_format=year-month月day   time_show=%Y%m%d     year=2020    month=2020-01     day=2020-01-01,2020-10-10
-- 连接数的问题
-- logger可选定向到文件还是返回前端
+    - logger可选定向到文件还是返回前端
     - msg参数改成字典，写每一步的步骤名和参数
     - 返回值增加log参数 [{"stage": "", "msg": "", "last": "10s"}, {}]
     - 添加是否显示log的项目参数
     - g变量的监听：装饰器？
     1. 封装一个函数，检查url速度问题【装饰器】
-    2. http://127.0.0.1:3389/api/xf/?gd_id1=%E4%BF%A1%E8%AE%BF%E4%BA%8B%E9%A1%B9%E9%A2%84%E8%AD%A6&gd_id2=%E8%B5%B4%E7%9C%81%E8%AE%BF&gd_id3=%E4%BF%A1%E8%AE%BF%E9%87%8F%E8%B5%B0%E5%8A%BF&Cqh=%E5%B9%BF%E4%B8%9C%E7%9C%81&day=[2020-10-20,2020-11-19]
-- 任意维度的占比，目前实现有问题
-- zb的功能丰富/groupby的功能丰富
-- 转交办效率【groupby  mean(value)】+预警状态的实现
-- 信访事项（xf_xfjmx)  需要去重计数groupby unicount
-- FUZZY-xm: 字段用分词查询
-- 插件过程加一个report 包括 指标和图表
+区划整理
+权限整理
+格式整理（括号的写法）
+refresh功能（内部起一个单独的程序，不走http）
+    所有可能取值用sql语句（需要定期更新，没必要每次都从库里取）
+    初始化值去去数据库查
+    refresh之后的返回值提供refresh过程的成功数/失败数/时间
+规范code 和 msg 信息
+report模式
+    情况1: 带数据反查的详细报表: 表格
+    情况2: 粗略报表,只显示数字【做成plugin，mode=report】
+    - 插件过程加一个report 包括 指标和图表
     实现方法就是把所有需要的数字，放到parse_data(app的那个入口函数)跑一遍
     图表: 在convert层做  graph=bar     show=data   |   pic   |   show=code
     show=data/pic/code              pic/code[需要指定type=num/bar/line/pie/map]  和 colors    BLUE
@@ -106,46 +27,109 @@ sqlite搭建数据库
     save2table=xf_xfj_cd_shej_xfjc    如果不指定可以推断出来
     save2es=
     graph=bar
-- add_unit的实现
-- embededding的嵌套格式【name=a,b,c,d】
-- 河北项目的sql过程是字符串类型的小数点
-    http://127.0.0.1:3389/api/xf/?gd_id=hb_xfxs_sxrmd&day=[2020-10-26,2020-11-25]
-- 系统配置中指定项目配置的默认值，不用每次用的时候给默认值
+搜索功能
+    - FUZZY-xm: 字段用分词查询
+关系图谱: 我是谁 告谁  经办人 问题属地 办理机构  户籍地  他父亲是谁（信访件要素识别）
+各阶段信访件个数: 受理 答复 办理 复查 复核，支持反查（数据反查/中间结果）
+嵌套格式（第五种数据格式，里面可以写之前的四种格式）
+full@exclude
+项目配置模板文件夹
+配置检查
+    init_dicts  dict/list
+    plugins 的检查  value_map
+    系统配置中指定项目配置的默认值，不用每次用的时候给默认值
+15. 对app.config封装一个类，类里面有一系列方法  class ConfigManager:
+        创建gd_id分发的接口，查看gd_id分发的接口，删除gd_id分发的接口
+        创建plugin[sql]的接口，查看plugin[sql]的接口，删除plugin[sql]的接口
+        注册字段进init_dicts的接口，查看init_dicts注册字段的接口，删除init_dicts注册字段的接口，
+        查看系统变量设置的接口，修改系统变量的接口
+        直接查看指定数据表所有字段名的接口    直接查看指定数据表数据[前n行]的接口       查看指定数据库数据表个数的接口
+16. debug的细化，可以最终执行的sql语句
+    普通extension
+    特殊extension[jssllv]
+    sql过程
+    custom过程
+17. sql_qhauth [auto/qh/sheshixj] 拿到g变量中【目前在apis中，还需要再global中加特殊参数，不合适】
+关掉没有表/没有字段 的报错  sql/custom过程依然会报错
 
-# 金鸿
+
+12. calculate增加sql文件夹存放sql文件，直接执行所有的sql文件写出到指定的数据库
+    增加多进程计算的支持
+
+
+################################################ Update ################################################
+插件过程SQL
+    sql跨数据库如何写
+参数
+    NoTableError的功能扩大
+    整理现有参数：注意，ceil系列，和插件过程结合问题，unit需要实现，小数点问题，百分号问题
+    用参数控制是否要做数值映射
+    full 参数
+        - 插件过程的sql模式的full参数，如何控制需要联动的变量
+        full=true 可以让接口处指定自己的范围
+        更新full所有可能取值：year=[now-5, now]之后需要full的时候，目前full会把所有年都弄出来
+        - name=year&full=true时，不写year的范围会报错，需要有个默认值  加一个项目参数：year的默认时间跨度
+        - nlrange在接口处定义  xfcsrange 在接口处定义
+    时间统一用year/month/day       year/month 数字格式   day日期格式
+        month=[now, now-12]如何做
+    ext_params
+add_unit的实现
+embededding的嵌套格式【name=a,b,c,d】
+sql执行过程，需要增加 Cqh的等级判断
+    a. ext=jssllv_xx_xx/jssllv_yy_yy
+    b. 解决权限问题
+
+数据格式
+    value_mapping有时无法生效
+        1. sql模式中有自己的映射方法
+            1. 项目的VALUE_MAP_FOR_PLUGIN_SQL
+            2. 自定义的value_map
+        2. utils.results2df中包含项目的映射，在params_search之后和sql模式中都用到了
+            项目的映射在utils.value_mapped中，被 utils.results2df使用   被   get_parsed_apis使用
+        3. - 接口处可以指定自己的value_map
+    time_format整理
+    同名列的不同取值整理
+    搜索过程整理LIKE-xm:字段用模糊查询（已解决）
+
+数据库问题
+    sqlite搭建数据库
+    数据库连接数的问题
+
+extension过程的整理
+    - zb的功能丰富/groupby的功能丰富
+        需要去重计数groupby unicount
+插件过程的配置文件加一个必填项字段，需要在sql语句中引用的，如果没传够，直接报错返回
+- authentication 中对 request_args也做了拷贝，不好
+- g变量   msg  code  apis_copy   apis   权限
+- 异步写入数据库的方法
+- 蓝图化：/api   /大屏    /refresh    /test
+8. 开发一个工具：将写好的表名，按照一定规则把表初始化到数据库，并可选是否随机初始化一些值
+预测功能整理
+    展示和用到的时间跨度不一定一样
+
+################################################ Fix ################################################
+- 插件过程，的url中如果出现了on/time_format等参数会报错，应该会覆盖
+- 插件过程的不匹配怎么办（merge的方式）
+- 任意维度的占比，目前实现有问题
 - uwsgi 在win下怎么用【不重要】
 - 监听一个进程的运行时间，超时就报错【不重要】
     自己想一个方法
     修改windows下的signal
 
+################################################ TODO ################################################
+- 写一个部署脚本（注意，数据库连接需要同时指定多个）
+    以该项目为模板，生成一个项目名的文件夹
+        1. 删除其他项目的配置文件/前端大屏
+        2. 需要动态指定数据库连接
+        3. win-server.py和uwsgi.ini需要修改
+- 环境初始化脚本（win+Linux)   win的脚本安装
+    1. 安装所有依赖：进度提示
+        依赖软件：redis+knime+anaconda
+        依赖python包：uwsgi+pymysql+cx_Oracle+flask_caching+pypinyin+pypandoc[+pandoc]+redis....
+    2. 写入环境变量：DABOT_STATE=PRO    选择数据库时先看环境变量
+
 
 ################################################ 影响广东项目 ################################################
--【待测试】 sql执行过程，需要增加 Cqh的等级判断
-    a. ext=jssllv_xx_xx/jssllv_yy_yy
-    b. 解决权限问题
--【待测试】 sql要把所有的参数拼进去
--【待测试】看0Y000089（0D00089和0Y00089）
-
-- 报告中的同比
-- 对数
-    - 参评评价的数字对不上
-    - 满意率和参评率的细化（0的问题）
-    - 信访事项预警-->省局集体访量-->两个满意率为0
-- 【已解决】权限
-    信访部门 + 责任单位 的弹窗的权限
-    ⭐方案：在api_gateway层加入cookie之后，在parse_api层 通过cookie加入 param_trans 参数
-- 权限需要注意的地方
-    微信端的权限
-    【在get_parsed_apis中修改】table参数
-    【在get_parsed_apis中修改】extra_index中的table修改 如件次/件次占比/人次/人次占比
-    【在get_parsed_apis中修改】gd_id分发的情况
-    gd_id的插件过程
-        【参考地图下钻的大弹窗】sql模式
-        custom模式
-- http://127.0.0.1:3389/api/xf/?transformer=@jssllv&ext=jssllv_xfbm_all_shej_nums/jssllv_xfbm_all_shij_nums&name=slqk&full=true&xfbm=%E5%B9%BF%E4%B8%9C%E7%9C%81%E4%BF%A1%E8%AE%BF%E5%B1%80
-    及时受理率的相关指标返回了"1"
-
-
 
 - 【已解决】ext_params 放transformer的参数【predict中测试】  删掉transformer参数校验的":"事情
 - 【已解决】*****预测的过程，展示和用到的时间跨度不一定一样
@@ -296,7 +280,7 @@ sqlite搭建数据库
         【付尧】2. 这四个里面有几个告警/几个异常/几个平稳
 6. 【已解决】广东问题：
 7. 云南旭日图的嵌套格式&limit=3    当嵌套格式的时候，limit指的是最外层的分类：yjnr要前三 ejnr
-8. 开发一个工具：将写好的表名，按照一定规则把表初始化到数据库，并可选是否随机初始化一些值
+
 9. 判断权限
     1. 【已解决】将gd_id的插件格式都加一个table参数，用来告诉qh2sheshixj
     2. 【暂不解决】接口中没有Cqh，统一加上
@@ -307,22 +291,10 @@ sqlite搭建数据库
     6. 【已解决】报告的权限[plugin 里面增加report功能   还是 sql_qh直接拼qh条件]
 10. 插件过程增加report【报告要处理权限】
 11. extra_index里面 兼容 = <==> @to:  [如果直接替换=，会把predict(7d+q=1)替换掉]
-12. calculate增加sql文件夹存放sql文件，直接执行所有的sql文件写出到指定的数据库
-    增加多进程计算的支持
+
 13. 【已解决】debug=1 或者 2 可以看到具体哪一个的请求（在search之前）
 14. 【已解决】缓存的路径需要拼接 权限
-15. 对app.config封装一个类，类里面有一系列方法  class ConfigManager:
-        创建gd_id分发的接口，查看gd_id分发的接口，删除gd_id分发的接口
-        创建plugin[sql]的接口，查看plugin[sql]的接口，删除plugin[sql]的接口
-        注册字段进init_dicts的接口，查看init_dicts注册字段的接口，删除init_dicts注册字段的接口，
-        查看系统变量设置的接口，修改系统变量的接口
-        直接查看指定数据表所有字段名的接口    直接查看指定数据表数据[前n行]的接口       查看指定数据库数据表个数的接口
-16. debug的细化，可以最终执行的sql语句
-    普通extension
-    特殊extension[jssllv]
-    sql过程
-    custom过程
-17. sql_qhauth [auto/qh/sheshixj] 拿到g变量中【目前在apis中，还需要再global中加特殊参数，不合适】
+
 18. 广东绩效考核
     区划
     1. 区划中选择来信/来访/   及时受理率是0
@@ -330,7 +302,7 @@ sqlite搭建数据库
     3. 按期答复率不变【来信来访网信是一样的 率+地图】
         权限： 按期答复率没变
             责任单位 参评满意 和
-关掉没有表/没有字段 的报错  sql/custom过程依然会报错
+
 
 
 #################### 广东交付 ####################
@@ -491,9 +463,7 @@ sqlite搭建数据库
         方法1: 把五阶段写到五张表里面
         方法2: 直接搜，加一个条件
 
-自定义报表
-    情况1: 带数据反查的详细报表: 表格
-    情况2: 粗略报表,只显示数字【做成plugin，mode=report】
+
 
 
 数据反查的原始图做成普通模式【需要加一个 transformer=dq_before】
@@ -521,18 +491,6 @@ sqlite搭建数据库
 ########################################## 重庆 ###############################################
 1. 最后一个板块的地图目前没有取最高值
 2. 受信人名单 的数据表 sx(顺序)字段的问题, 需要sxr字段【待确认】【目前用的是河北的表】
-
-########################################## 广东 ###############################################
-1. sql要大改
-2. 报告报错【接入生成pdf的过程】
-3. sql大改完，丢掉很多param_trans的东西，需要拿线上备份的对
-4. 制作东莞市的区县json地图
-5. 覆盖线上的gd配置之后，添加每日新房动态排名的order=desc
-
-########################################## 云南 ###############################################
-1. 信访指数的计算
-2. 数据表的大反查: nlrange的反查
-    需要中间表: 计算的时候保存中间结果
 
 ########################################## 工具 ###############################################
 1. 打包工具：确定需要打包的项目，基于现在的内容，删除其他项目，重命名后打包
@@ -593,37 +551,3 @@ sqlite搭建数据库
         流程编号(0D000XX) 开始执行时间  执行完成时间  执行耗时  执行状态 异常原因 创建时间  修改时间
     7. 并行数
     8. 是否测试过程: 测试就是把所有的sql，limit=1
-
-
-云南
-    漏斗的custom
-    时间线的custom: br连接  没有次数 只有内容
-    卡片的custom: 类似时间线的custom 多几个wrapper
-
-漏斗：
-<p style="font-size: 18px;
-          color: #fff;line-height: 30px;">
-            <b style="color: #ff0010;">一般信访行为</b>
-            转化为 <b style="color: #ff0010;">到省访</b>转化率为 <b style="color: #ff0010;">89%</b>，实施 <b style="color: #ff0010;">红色预警</b>
-            </p >
-            <p style="font-size: 18px;
-          color: #fff;line-height: 30px;">
-            <b style="color: #fe5e00;">一般信访行为</b>
-            转化为 <b style="color: #fe5e00;">到省访</b>转化率为 <b style="color: #fe5e00;">89%</b>，实施 <b style="color: #fe5e00;">橙色预警</b>
-
-            </p >
-            <p style="font-size: 18px;
-          color: #fff;line-height: 30px;">
-              <b style="color: #2a5cfd;">一般信访行为</b>
-            转化为 <b style="color: #2a5cfd;">到省访</b>转化率为 <b style="color: #2a5cfd;">89%</b>，实施 <b style="color: #2a5cfd;">蓝色预警</b>
-            </p >
-深圳
-    问题1：main_name=$zqlx
-    问题2：main_name=总数:bar,:line
-    [done]问题3：value和name-value用main_name拼起来
-    问题4：value_map
-
-深圳：
-占比的sum分类讨论                       本地是对的
-conver_df的__init__ 报错时返回了元组     本地是对的
-dispatch的市辖区
