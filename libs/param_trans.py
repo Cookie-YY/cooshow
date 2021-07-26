@@ -2,6 +2,7 @@ from flask import g
 import pandas as pd
 import os
 
+
 class ParamTrans:
     def __init__(self, apis_copy):
         self.apis_copy = apis_copy

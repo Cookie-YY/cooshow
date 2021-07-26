@@ -3,7 +3,7 @@ import random
 
 from flask import g
 
-from libs.extensions import Extension
+from libs.extension import Extension
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm

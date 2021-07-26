@@ -1,4 +1,4 @@
-from libs.extensions import Extension
+from libs.extension import Extension
 import pandas as pd
 
 class Topkzb(Extension):

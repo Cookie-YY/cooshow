@@ -124,7 +124,7 @@ def limit(res, limit_):
 
 
 # 入口函数
-def convert2embedding(dataframe):
+def convert2nested(dataframe):
     # 0. 拿到颜色
     from app import app
     global color_series_list

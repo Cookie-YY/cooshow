@@ -1,4 +1,4 @@
-from libs.extensions import Extension
+from libs.extension import Extension
 
 
 class Zb(Extension):

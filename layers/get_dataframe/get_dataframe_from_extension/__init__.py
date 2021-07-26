@@ -10,7 +10,7 @@ def get_dataframe_from_extension(apis_copy, apis):
     from app import app
     module_path = f"settings.{app.config['PROJECT']}.extensions.{extension_module}" \
         if extension_module in app.config.get("CUS_EXTENSIONS", []) \
-        else f"libs.extensions.{extension_module}"
+        else f"settings.sys.extensions.{extension_module}"
     extension_setting = __import__(module_path, globals(), locals(), [extension_class])  # 导入extension
     Ext = getattr(extension_setting, extension_class)
 
