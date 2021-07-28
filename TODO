@@ -1,6 +1,7 @@
 # TODO
 settings/sys的内容
 libs中的内容供sys引用
+config类，项目的config融合
 
 g变量中的内容
     当前log实例对象：log_id/状态/阶段1.1-1/阶段中文/阶段英文/函数名(方便查错)/信息/开始时间/耗时/全局开始时间

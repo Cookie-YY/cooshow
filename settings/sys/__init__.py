@@ -40,7 +40,7 @@ SHOW_INDEX_FILE = "index.html"         # path:  {FRONT_DIR}/{FRONT_PROJECT}/{SHO
 # SHOW_INDEX_FILE_1 = "index.html"
 
 
-############################### Auth/Login settings ###############################
+############################### Login/Auth settings ###############################
 LOGIN_AUTH = False  # 为True时需要满足用户名密码的要求
 LEVEL_AUTH = True  # 为True时必须指定 LEVEL_AUTH_COOKIE
 LEVEL_AUTH_PARAM = "xzqh"  # 参数中控制权限的参数（跳转到大屏时获得该参数）
